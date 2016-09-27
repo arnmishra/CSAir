@@ -1,20 +1,31 @@
 
 
 def hub_cities(airline_network):
+    min_hub = int(raw_input("Minimum number of routes for hub: "))
     all_metros = airline_network.get_all_nodes().values()
-    max_routes = None
+    hubs = {}
     for metro in all_metros:
         connected_routes = metro.get_connected_nodes()
-        if not connected_routes or len(connected_routes) > max_routes:
-            hubs = [metro.get_metro_data()["name"], len(connected_routes)]
-            max_routes = len(connected_routes)
-        elif len(connected_routes) == max_routes:
-            hubs.append(metro.get_metro_data()["name"])
+        num_routes = len(connected_routes)
+        if num_routes >= min_hub:
+            if num_routes in hubs:
+                hubs[num_routes].append(metro.get_metro_data()["name"])
+            else:
+                hubs[num_routes] = [metro.get_metro_data()["name"]]
     return hubs
 
 
 def cities_by_continent(airline_network):
-    return 0
+    all_metros = airline_network.get_all_nodes().values()
+    continents_served = {}
+    for metro in all_metros:
+        metro_data = metro.get_metro_data()
+        continent = metro_data["continent"]
+        if continent in continents_served:
+            continents_served[continent].append(metro_data["name"])
+        else:
+            continents_served[continent] = [metro_data["name"]]
+    return continents_served
 
 
 def average_population(airline_network):
