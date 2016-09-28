@@ -2,44 +2,36 @@
 
 
 class Node:
-    def __init__(self, metro_data):
-        self.metro_data = metro_data
+    def __init__(self, data):
+        self.data = data
         self.connected_nodes = {}
 
-    def add_edge(self, node, distance):
-        self.connected_nodes[node] = distance
+    def add_edge(self, node, weight):
+        self.connected_nodes[node] = weight
 
     def get_connected_nodes(self):
         return self.connected_nodes
 
-    def get_metro_data(self):
-        return self.metro_data
+    def get_data(self):
+        return self.data
 
 
 class Graph:
     def __init__(self):
         self.nodes = {}
 
-    def add_node(self, metro_data):
-        city_code = metro_data["code"]
-        node = Node(metro_data)
-        self.nodes[city_code] = node
+    def add_node(self, key, data):
+        node = Node(data)
+        self.nodes[key] = node
 
     def get_all_nodes(self):
         return self.nodes
 
-    def get_city(self, city_name):
-        return self.nodes[city_name].get_metro_data()
+    def get_node(self, key):
+        return self.nodes[key].get_data()
 
-    def get_all_cities(self):
-        city_names = []
-        for city_code in self.nodes:
-            metro_data = self.nodes[city_code].get_metro_data()
-            city_names.append(metro_data["name"])
-        return city_names
-
-    def add_connection(self, start_city, end_city, distance):
-        start_node = self.nodes[start_city]
-        end_node = self.nodes[end_city]
-        start_node.add_edge(end_node, distance)
-        end_node.add_edge(start_node, distance)
+    def add_connection(self, start_key, end_key, weight):
+        start_node = self.nodes[start_key]
+        end_node = self.nodes[end_key]
+        start_node.add_edge(end_node, weight)
+        end_node.add_edge(start_node, weight)

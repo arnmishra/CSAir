@@ -1,7 +1,6 @@
 import json
-import sys
 from Framework.graph import Graph
-from Framework.statistics import get_statistic
+from Framework.graph_functions import get_statistic, get_all_cities
 
 MAP_FILE = "map_data.json"
 
@@ -11,13 +10,17 @@ def prompt_user_for_input(airline_network):
     prompt += 'For information about a single city, enter "1".\n'
     prompt += 'For statistics about CSAir, enter "2".\n'
 
-    response = int(raw_input(prompt))
-
+    response = raw_input(prompt)
+    while not response or int(response) > 2 or int(response) < 0:
+        response = raw_input()
+    response = int(response)
     if response == 0:
-        print airline_network.get_all_cities()
+        cities = get_all_cities(airline_network)
+        for city in cities:
+            print city[0], city[1]
     elif response == 1:
         city_name = raw_input("Enter the city code for which you want the information: ").strip()
-        metro_data = airline_network.get_city(city_name)
+        metro_data = airline_network.get_node(city_name)
         for key in metro_data:
             print key, ":", metro_data[key]
     elif response == 2:
@@ -46,7 +49,7 @@ def main():
     map_data = json.load(map_data_file)
     airline_network = Graph()
     for metro in map_data["metros"]:
-        airline_network.add_node(metro)
+        airline_network.add_node(metro["code"], metro)
     for route in map_data["routes"]:
         airline_network.add_connection(route["ports"][0], route["ports"][1], route["distance"])
     response = 0
