@@ -1,10 +1,11 @@
 """ File to facilitate incoming queries and outgoing results with the user. """
 
-from graph_functions import get_statistic, get_all_cities
+from graph_functions import get_statistic, get_all_cities, get_map_of_routes
 
 INITIAL_PROMPT = ("\n0 - List of all cities\n"
                   "1 - Information About Individual City\n"
-                  "2 - Statistics about CSAir\n")
+                  "2 - Statistics about CSAir\n"
+                  "3 - Get Map of all Routes in CSAir Network\n")
 
 STATISTIC_PROMPT = ("\nEnter the number associated with the statistic:\n"
                     "0 - Longest Single Flight\n"
@@ -44,7 +45,7 @@ def prompt_user_for_input(airline_network):
     :param airline_network:
     """
     response = raw_input(INITIAL_PROMPT)
-    while not response or int(response) > 2 or int(response) < 0:
+    while not response or int(response) > 3 or int(response) < 0:
         response = raw_input()
     response = int(response)
 
@@ -55,3 +56,5 @@ def prompt_user_for_input(airline_network):
     elif response == 2:
         statistic_code = int(raw_input(STATISTIC_PROMPT))
         print get_statistic(statistic_code, airline_network)
+    elif response == 3:
+        get_map_of_routes(airline_network)

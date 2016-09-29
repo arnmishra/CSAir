@@ -1,5 +1,26 @@
 """ File to hold all Graph data manipulation done for CSAir. """
 
+import webbrowser
+
+MAP_BASE_URL = "http://www.gcmap.com/mapui?P="
+
+
+def get_map_of_routes(airline_network):
+    """
+    http://stackoverflow.com/questions/4302027/how-to-open-a-url-in-python
+    :param airline_network:
+    :return:
+    """
+    all_metros = airline_network.get_all_nodes()
+    route_url = MAP_BASE_URL
+    for city_code in all_metros:
+        metro = all_metros[city_code]
+        connected_nodes = metro.get_connected_nodes()
+        for destination in connected_nodes:
+            route_url += "%s-%s," % (city_code, destination.get_data()["code"])
+    webbrowser.open(route_url)
+    print route_url
+
 
 def get_all_cities(airline_network):
     """ Gets all city codes and names from Graph Object
@@ -29,17 +50,20 @@ def hub_cities(airline_network):
         num_routes = len(connected_routes)
         if num_routes >= min_hub:
             if num_routes in hubs:
-                hubs[num_routes].append(metro.get_data()["name"])
+                hubs[num_routes] += ", " + metro.get_data()["name"]
             else:
-                hubs[num_routes] = [metro.get_data()["name"]]
-    return hubs
+                hubs[num_routes] = metro.get_data()["name"]
+    hub_list_string = ""
+    for num_routes in hubs:
+        hub_list_string += "%i routes: %s\n" % (num_routes, hubs[num_routes])
+    return hub_list_string
 
 
 def cities_by_continent(airline_network):
     """ List of cities by each continent they are in.
 
     :param airline_network: Graph Object with CSAir Information
-    :return: Mapping of cities to continent
+    :return: Mapping of continents to all cities in them
     """
     all_metros = airline_network.get_all_nodes().values()
     continents_served = {}
@@ -47,10 +71,13 @@ def cities_by_continent(airline_network):
         metro_data = metro.get_data()
         continent = metro_data["continent"]
         if continent in continents_served:
-            continents_served[continent].append(metro_data["name"])
+            continents_served[continent] += ", " + metro_data["name"]
         else:
-            continents_served[continent] = [metro_data["name"]]
-    return continents_served
+            continents_served[continent] = metro_data["name"]
+    continents_list_string = ""
+    for continent in continents_served:
+        continents_list_string += "%s: %s\n" % (continent, continents_served[continent])
+    return continents_list_string
 
 
 def average_population(airline_network):
@@ -66,7 +93,7 @@ def average_population(airline_network):
         metro_data = metro.get_data()
         all_populations += metro_data["population"]
         num_cities += 1
-    return all_populations/num_cities
+    return "Average population: " + str(all_populations / num_cities)
 
 
 def smallest_city(airline_network):
@@ -76,12 +103,12 @@ def smallest_city(airline_network):
     :return: Smallest City
     """
     all_metros = airline_network.get_all_nodes().values()
-    smallest_population = None
+    smallest_metro = None
     for metro in all_metros:
         metro_data = metro.get_data()
-        if not smallest_population or metro_data["population"] < smallest_population["population"]:
-            smallest_population = metro_data
-    return smallest_population["name"]
+        if not smallest_metro or metro_data["population"] < smallest_metro["population"]:
+            smallest_metro = metro_data
+    return "Smallest City: " + smallest_metro["name"] + " with population " + str(smallest_metro["population"])
 
 
 def biggest_city(airline_network):
@@ -91,12 +118,12 @@ def biggest_city(airline_network):
     :return: Biggest City
     """
     all_metros = airline_network.get_all_nodes().values()
-    biggest_population = None
+    biggest_metro = None
     for metro in all_metros:
         metro_data = metro.get_data()
-        if not biggest_population or metro_data["population"] > biggest_population["population"]:
-            biggest_population = metro_data
-    return biggest_population["name"]
+        if not biggest_metro or metro_data["population"] > biggest_metro["population"]:
+            biggest_metro = metro_data
+    return "Biggest City: " + biggest_metro["name"] + " with population " + str(biggest_metro["population"])
 
 
 def average_distance(airline_network):
@@ -113,7 +140,7 @@ def average_distance(airline_network):
         for destination in connected_routes:
             total_distance += connected_routes[destination]
             num_routes += 1
-    return total_distance / num_routes
+    return "Average Distance of Flights: " + str(total_distance / num_routes)
 
 
 def get_shortest_single_flight(airline_network):
@@ -133,7 +160,7 @@ def get_shortest_single_flight(airline_network):
                 start_city = metro.get_data()["name"]
                 end_city = destination.get_data()["name"]
                 shortest_distance = connected_routes[destination]
-    return "From %s to %s (%i)" % (start_city, end_city, shortest_distance)
+    return "Shortest Flight: from %s to %s (%i)" % (start_city, end_city, shortest_distance)
 
 
 def get_longest_single_flight(airline_network):
@@ -153,7 +180,7 @@ def get_longest_single_flight(airline_network):
                 start_city = metro.get_data()["name"]
                 end_city = destination.get_data()["name"]
                 longest_distance = connected_routes[destination]
-    return "From %s to %s (%i)" % (start_city, end_city, longest_distance)
+    return "Longest Flight: from %s to %s (%i)" % (start_city, end_city, longest_distance)
 
 
 def get_statistic(statistic_code, airline_network):
