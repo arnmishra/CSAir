@@ -1,7 +1,17 @@
-# http://www.bogotobogo.com/python/python_graph_data_structures.php
+""" Generic Graph class consisting of Nodes.
+
+Source used to understand python classes:
+http://www.bogotobogo.com/python/python_graph_data_structures.php
+"""
 
 
 class Node:
+    """ Node class to store data in the graph.
+
+    Each Node stores an adjacency list
+    of all connected Nodes in the form of a dictionary that maps connected
+    Node to its weight. Each Node also stores the data pertaining to it.
+    """
     def __init__(self, data):
         self.data = data
         self.connected_nodes = {}
@@ -17,6 +27,13 @@ class Node:
 
 
 class Graph:
+    """ Graph class to hold data about all nodes.
+
+    The Graph class stores all the Nodes that are part of it in a dictionary
+    that maps a key that the user provides to each node in the Graph. The Graph
+    also adds an edge from both start to end as well as end to start each time a
+    new connection is created to ensure each pair of nodes are connected both ways.
+    """
     def __init__(self):
         self.nodes = {}
 
