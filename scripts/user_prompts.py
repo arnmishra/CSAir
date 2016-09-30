@@ -2,6 +2,7 @@
 
 from graph_functions import *
 from colorama import Fore
+import user_prompts
 
 INITIAL_PROMPT = ("\n0 - List of all cities\n"
                   "1 - Information About Individual City\n"
@@ -43,10 +44,18 @@ def print_individual_city(airline_network):
 
     :param airline_network: Graph object of CSAir flights.
     """
-    city_name = raw_input("Enter the city code for which you want the information: ").strip()
-    metro_data = airline_network.get_node(city_name)
+    city_code = raw_input("Enter the city code for which you want the information: ").strip()
+    metro = airline_network.get_node(city_code)
+    if not metro:
+        print_error("Incorrect City Code: " + city_code)
+        return
+    metro_data = metro.get_data()
     for key in metro_data:
         print_message(key + " : " + str(metro_data[key]))
+    metro_connections = metro.get_connected_nodes()
+    print_message("Connections to:")
+    for connection in metro_connections:
+        print_message("\t%s (%i miles)" %(connection.get_data()["name"], metro_connections[connection]))
 
 
 def prompt_user_for_input(airline_network):
@@ -99,3 +108,7 @@ def get_statistic(statistic_code, airline_network):
 
 def print_message(message):
     print(Fore.GREEN + message + Fore.RESET)
+
+
+def print_error(message):
+    print(Fore.RED + message + Fore.RESET)

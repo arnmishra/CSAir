@@ -14,8 +14,8 @@ class TestGraph(unittest.TestCase):
         graph = Graph()
         node = Node("test_data")
         graph.add_node("test_key", "test_data")
-        test_node_data = graph.get_node("test_key")
-        self.assertEqual(node.get_data(), test_node_data)
+        test_node = graph.get_node("test_key")
+        self.assertEqual(node.get_data(), test_node.get_data())
 
     def test_add_connection(self):
         """ Test that connections can be created and all nodes can be returned correctly. """

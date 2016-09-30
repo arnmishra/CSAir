@@ -5,7 +5,6 @@ import json
 import sys
 
 from framework.graph import Graph
-import user_prompts
 
 MAP_BASE_URL = "http://www.gcmap.com/mapui?P="
 
