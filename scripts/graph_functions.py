@@ -1,14 +1,41 @@
 """ File to hold all Graph data manipulation done for CSAir. """
 
 import webbrowser
+import json
+import sys
+
+from framework.graph import Graph
+import user_prompts
 
 MAP_BASE_URL = "http://www.gcmap.com/mapui?P="
 
 
-def get_map_of_routes(airline_network):
+def create_graph_from_file(map_file_path="data/map_data.json"):
+    """ Creates graph object from JSON File with data about airline mappings.
+
+    :param map_file_path: The File Path to use to get the Graph data
+    :return: graph object that is created
     """
+    try:
+        map_data_file = open(map_file_path, "r")
+    except Exception, e:
+        print e
+        sys.exit(1)
+    map_data = json.load(map_data_file)
+    airline_network = Graph()
+    for metro in map_data["metros"]:
+        airline_network.add_node(metro["code"], metro)
+    for route in map_data["routes"]:
+        airline_network.add_connection(route["ports"][0], route["ports"][1], route["distance"])
+    return airline_network
+
+
+def get_map_of_routes(airline_network, open_route_url=True):
+    """ Creates a URL and opens it if the flag is True to show a map of the CSAir Network
+
     http://stackoverflow.com/questions/4302027/how-to-open-a-url-in-python
-    :param airline_network:
+    :param airline_network: Graph Object with CSAir Information
+    :param open_route_url: Whether or not to open the url automatically
     :return:
     """
     all_metros = airline_network.get_all_nodes()
@@ -18,8 +45,9 @@ def get_map_of_routes(airline_network):
         connected_nodes = metro.get_connected_nodes()
         for destination in connected_nodes:
             route_url += "%s-%s," % (city_code, destination.get_data()["code"])
-    webbrowser.open(route_url)
-    print route_url
+    if open_route_url:
+        webbrowser.open(route_url)
+    return route_url
 
 
 def get_all_cities(airline_network):
@@ -36,13 +64,13 @@ def get_all_cities(airline_network):
     return city_names
 
 
-def hub_cities(airline_network):
+def get_hub_cities(airline_network, min_hub):
     """ Gets all Hubs based on User Specified baseline number of routes
 
     :param airline_network: Graph Object with CSAir Information
+    :param min_hub: Minimum number of routes for a city to be considered a hub
     :return: list of hub cities and how many routes they have
     """
-    min_hub = int(raw_input("Minimum number of routes for hub: "))
     all_metros = airline_network.get_all_nodes().values()
     hubs = {}
     for metro in all_metros:
@@ -59,7 +87,7 @@ def hub_cities(airline_network):
     return hub_list_string
 
 
-def cities_by_continent(airline_network):
+def get_cities_by_continent(airline_network):
     """ List of cities by each continent they are in.
 
     :param airline_network: Graph Object with CSAir Information
@@ -80,7 +108,7 @@ def cities_by_continent(airline_network):
     return continents_list_string
 
 
-def average_population(airline_network):
+def get_average_population(airline_network):
     """ Calculates the average population of the cities in the CSAir network.
 
     :param airline_network: Graph Object with CSAir Information
@@ -96,7 +124,7 @@ def average_population(airline_network):
     return "Average population: " + str(all_populations / num_cities)
 
 
-def smallest_city(airline_network):
+def get_smallest_city(airline_network):
     """ Finds the smallest city by population in the CSAir network.
 
     :param airline_network: Graph Object with CSAir Information
@@ -111,7 +139,7 @@ def smallest_city(airline_network):
     return "Smallest City: " + smallest_metro["name"] + " with population " + str(smallest_metro["population"])
 
 
-def biggest_city(airline_network):
+def get_biggest_city(airline_network):
     """ Finds the largest city by population in the CSAir network.
 
     :param airline_network: Graph Object with CSAir Information
@@ -126,7 +154,7 @@ def biggest_city(airline_network):
     return "Biggest City: " + biggest_metro["name"] + " with population " + str(biggest_metro["population"])
 
 
-def average_distance(airline_network):
+def get_average_distance(airline_network):
     """ Calculates the average distance between cities in the CSAir network.
 
     :param airline_network: Graph Object with CSAir Information
@@ -182,27 +210,3 @@ def get_longest_single_flight(airline_network):
                 longest_distance = connected_routes[destination]
     return "Longest Flight: from %s to %s (%i)" % (start_city, end_city, longest_distance)
 
-
-def get_statistic(statistic_code, airline_network):
-    """ Maps the user entered code to the correct statistic to query
-
-    :param statistic_code: Code the user entered
-    :param airline_network: Graph Object with CSAir Information
-    :return: The data the user queried for
-    """
-    if statistic_code == 0:
-        return get_longest_single_flight(airline_network)
-    if statistic_code == 1:
-        return get_shortest_single_flight(airline_network)
-    if statistic_code == 2:
-        return average_distance(airline_network)
-    if statistic_code == 3:
-        return biggest_city(airline_network)
-    if statistic_code == 4:
-        return smallest_city(airline_network)
-    if statistic_code == 5:
-        return average_population(airline_network)
-    if statistic_code == 6:
-        return cities_by_continent(airline_network)
-    if statistic_code == 7:
-        return hub_cities(airline_network)

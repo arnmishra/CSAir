@@ -1,6 +1,7 @@
 """ File to facilitate incoming queries and outgoing results with the user. """
 
-from graph_functions import get_statistic, get_all_cities, get_map_of_routes
+from graph_functions import *
+from colorama import Fore
 
 INITIAL_PROMPT = ("\n0 - List of all cities\n"
                   "1 - Information About Individual City\n"
@@ -18,6 +19,15 @@ STATISTIC_PROMPT = ("\nEnter the number associated with the statistic:\n"
                     "7 - CSAir's Hub Cities\n")
 
 
+def get_hub_city_threshold():
+    """ Get the threshold number of routes for a city to be considered a hub.
+
+    :return: Minimum number of routes
+    """
+    min_hub = int(raw_input("Minimum number of routes for hub: "))
+    return min_hub
+
+
 def print_all_cities(airline_network):
     """ Gets all cities from graph object and prints city codes and names.
 
@@ -25,7 +35,7 @@ def print_all_cities(airline_network):
     """
     cities = get_all_cities(airline_network)
     for city in cities:
-        print city[0], city[1]
+        print_message(city[0] + " " + city[1])
 
 
 def print_individual_city(airline_network):
@@ -36,7 +46,7 @@ def print_individual_city(airline_network):
     city_name = raw_input("Enter the city code for which you want the information: ").strip()
     metro_data = airline_network.get_node(city_name)
     for key in metro_data:
-        print key, ":", metro_data[key]
+        print_message(key + " : " + str(metro_data[key]))
 
 
 def prompt_user_for_input(airline_network):
@@ -55,6 +65,37 @@ def prompt_user_for_input(airline_network):
         print_individual_city(airline_network)
     elif response == 2:
         statistic_code = int(raw_input(STATISTIC_PROMPT))
-        print get_statistic(statistic_code, airline_network)
+        print_message(get_statistic(statistic_code, airline_network))
     elif response == 3:
-        get_map_of_routes(airline_network)
+        url = get_map_of_routes(airline_network)
+        print_message(url)
+
+
+def get_statistic(statistic_code, airline_network):
+    """ Maps the user entered code to the correct statistic to query
+
+    :param statistic_code: Code the user entered
+    :param airline_network: Graph Object with CSAir Information
+    :return: The data the user queried for
+    """
+    if statistic_code == 0:
+        return get_longest_single_flight(airline_network)
+    if statistic_code == 1:
+        return get_shortest_single_flight(airline_network)
+    if statistic_code == 2:
+        return get_average_distance(airline_network)
+    if statistic_code == 3:
+        return get_biggest_city(airline_network)
+    if statistic_code == 4:
+        return get_smallest_city(airline_network)
+    if statistic_code == 5:
+        return get_average_population(airline_network)
+    if statistic_code == 6:
+        return get_cities_by_continent(airline_network)
+    if statistic_code == 7:
+        min_hub = user_prompts.get_hub_city_threshold()
+        return get_hub_cities(airline_network, min_hub)
+
+
+def print_message(message):
+    print(Fore.GREEN + message + Fore.RESET)

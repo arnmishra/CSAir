@@ -1,0 +1,53 @@
+{
+	"metros" : [
+		{
+			"code" : "SCL" ,
+			"name" : "Santiago" ,
+			"country" : "CL" ,
+			"continent" : "South America" ,
+			"timezone" : -4 ,
+			"coordinates" : {"S" : 33, "W" : 71} ,
+			"population" : 6000000 ,
+			"region" : 1
+		} , {
+			"code" : "LIM" ,
+			"name" : "Lima" ,
+			"country" : "PE" ,
+			"continent" : "South America" ,
+			"timezone" : -5 ,
+			"coordinates" : {"S" : 12, "W" : 77} ,
+			"population" : 9050000 ,
+			"region" : 1
+		} , {
+			"code" : "MEX" ,
+			"name" : "Mexico City" ,
+			"country" : "MX" ,
+			"continent" : "North America" ,
+			"timezone" : -6 ,
+			"coordinates" : {"N" : 19, "W" : 99} ,
+			"population" : 23400000 ,
+			"region" : 1
+		} , {
+			"code" : "BOG" ,
+			"name" : "Bogota" ,
+			"country" : "CO" ,
+			"continent" : "South America" ,
+			"timezone" : -5 ,
+			"coordinates" : {"N" : 5, "W" : 74} ,
+			"population" : 8600000 ,
+			"region" : 1
+		}
+	] ,
+	"routes" : [
+		{
+			"ports" : ["SCL" , "LIM"] ,
+			"distance" : 2453
+		} , {
+			"ports" : ["LIM" , "MEX"] ,
+			"distance" : 4231
+		} , {
+			"ports" : ["LIM" , "BOG"] ,
+			"distance" : 1879
+		}
+	]
+}
