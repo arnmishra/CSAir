@@ -3,15 +3,19 @@
 import webbrowser
 import json
 import sys
+import math
 
 from framework.graph import Graph
 
 MAP_BASE_URL = "http://www.gcmap.com/mapui?P="
+ACCELERATION = ((750.0/60)**2)/(2*200)  # a = v^2/(2*d) in km/min^2
 
 
-def create_graph_from_file(map_file_path="data/map_data.json"):
-    """ Creates graph object from JSON File with data about airline mappings.
+def add_file_data_to_graph(airline_network=Graph(), map_file_path="data/map_data.json"):
+    """ Creates graph object from JSON File with data about airline mappings. This
+    includes making each connection bidirectional between the cities.
 
+    :param airline_network: If no airline network graph provided, create new network.
     :param map_file_path: The File Path to use to get the Graph data
     :return: graph object that is created
     """
@@ -21,11 +25,11 @@ def create_graph_from_file(map_file_path="data/map_data.json"):
         print e
         sys.exit(1)
     map_data = json.load(map_data_file)
-    airline_network = Graph()
     for metro in map_data["metros"]:
         airline_network.add_node(metro["code"], metro)
     for route in map_data["routes"]:
         airline_network.add_connection(route["ports"][0], route["ports"][1], route["distance"])
+        airline_network.add_connection(route["ports"][1], route["ports"][0], route["distance"])
     return airline_network
 
 
@@ -42,7 +46,8 @@ def get_map_of_routes(airline_network, open_route_url=True):
     for city_code in all_metros:
         metro = all_metros[city_code]
         connected_nodes = metro.get_connected_nodes()
-        for destination in connected_nodes:
+        for destination_code in connected_nodes:
+            destination = airline_network.get_node(destination_code)
             route_url += "%s-%s," % (city_code, destination.get_data()["code"])
     if open_route_url:
         webbrowser.open(route_url)
@@ -182,11 +187,12 @@ def get_shortest_single_flight(airline_network):
     end_city = None
     for metro in all_metros:
         connected_routes = metro.get_connected_nodes()
-        for destination in connected_routes:
-            if not shortest_distance or shortest_distance > connected_routes[destination]:
+        for destination_code in connected_routes:
+            if not shortest_distance or shortest_distance > connected_routes[destination_code]:
                 start_city = metro.get_data()["name"]
-                end_city = destination.get_data()["name"]
-                shortest_distance = connected_routes[destination]
+                destination_node = airline_network.get_node(destination_code)
+                end_city = destination_node.get_data()["name"]
+                shortest_distance = connected_routes[destination_code]
     return "Shortest Flight: from %s to %s (%i)" % (start_city, end_city, shortest_distance)
 
 
@@ -202,10 +208,101 @@ def get_longest_single_flight(airline_network):
     end_city = None
     for metro in all_metros:
         connected_routes = metro.get_connected_nodes()
-        for destination in connected_routes:
-            if not longest_distance or longest_distance < connected_routes[destination]:
+        for destination_code in connected_routes:
+            if not longest_distance or longest_distance < connected_routes[destination_code]:
                 start_city = metro.get_data()["name"]
-                end_city = destination.get_data()["name"]
-                longest_distance = connected_routes[destination]
+                destination_node = airline_network.get_node(destination_code)
+                end_city = destination_node.get_data()["name"]
+                longest_distance = connected_routes[destination_code]
     return "Longest Flight: from %s to %s (%i)" % (start_city, end_city, longest_distance)
 
+
+def delete_city(airline_network, delete_city_code):
+    airline_network.delete_node(delete_city_code)
+    all_cities = airline_network.get_all_nodes()
+    for city_code in all_cities:
+        connections_to_city = all_cities[city_code].get_connected_nodes()
+        if delete_city_code in connections_to_city.keys():
+            del connections_to_city[delete_city_code]
+
+
+def delete_route(airline_network, start_city_code, end_city_code, bidirectional):
+    airline_network.delete_connection(start_city_code, end_city_code)
+    if bidirectional.lower() == "y":
+        airline_network.delete_connection(end_city_code, start_city_code)
+
+
+def add_city(airline_network, city_data):
+    city_code = city_data["code"]
+    if not city_code:
+        return False
+    airline_network.add_node(city_code, city_data)
+
+
+def add_route(airline_network, bidirectional, start_route, end_route, weight):
+    airline_network.add_connection(start_route, end_route, weight)
+    if bidirectional.lower() == "y":
+        airline_network.add_connection(end_route, start_route, weight)
+
+
+def download_data_to_json(airline_network):
+    """
+    http://stackoverflow.com/questions/12309269/how-do-i-write-json-data-to-a-file-in-python
+    http://stackoverflow.com/questions/12943819/how-to-python-prettyprint-a-json-file
+    :param airline_network:
+    :param json_file_name:
+    :return:
+    """
+    compiled_json = {"metros": [], "routes": []}
+    all_nodes = airline_network.get_all_nodes()
+    for city_code in all_nodes:
+        node_data = all_nodes[city_code].get_data()
+        compiled_json["metros"].append(node_data)
+        connections = all_nodes[city_code].get_connected_nodes()
+        for destination_code in connections:
+            route = {"ports": [node_data["code"], destination_code], "distance": connections[destination_code]}
+            compiled_json["routes"].append(route)
+    with open("data/output_data.json", 'w') as json_file:
+        json.dump(compiled_json, json_file, indent=4, sort_keys=True)
+
+
+def get_route_data(airline_network, city_codes):
+    if len(city_codes) < 2:
+        return False
+    total_distance = 0
+    total_cost = 0
+    total_time = 0
+    cost_per_kilometer = 0.35
+    start_code = city_codes[0]
+    start_city = airline_network.get_node(start_code)
+    for i in range(1, len(city_codes)):
+        city_code = city_codes[i]
+        connections = start_city.get_connected_nodes()
+        if city_code in connections:
+            distance = connections[city_code]
+            total_distance += distance
+            total_cost += distance * cost_per_kilometer
+            if cost_per_kilometer >= 0.5:
+                cost_per_kilometer -= 0.5
+            if distance >= 400:
+                acceleration_time = math.sqrt((2*200)/ACCELERATION)  # t = sqrt(2d/a) in minutes
+                cruising_time = (distance - 400.0)/(750 / 60)  # t = d/v in minutes
+                total_time += 2*acceleration_time + cruising_time  # cruising time + acceleration + deceleration
+            else:
+                acceleration_time = math.sqrt((2*distance/2)/ACCELERATION)  # in minutes
+                total_time += 2*acceleration_time  # acceleration + deceleration
+            if i != len(city_codes)-1:
+                layover_time = 120 - 10*(len(connections) - 1)  # in minutes
+                if layover_time < 0:
+                    layover_time = 0
+                total_time += layover_time
+            start_city = airline_network.get_node(city_code)
+        else:
+            return False
+    return "Total Distance = %i\nTotal Cost = $%.2f\nTotal Time = %ihrs %imins" \
+           % (total_distance, total_cost, total_time/60, total_time % 60)
+
+
+def get_shortest_path(airline_network, start_city, end_city):
+    #  Djikstras
+    print airline_network, start_city, end_city

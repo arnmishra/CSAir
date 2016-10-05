@@ -1,0 +1,53 @@
+
+{
+	"data sources" : [
+		"http://www.gcmap.com/" ,
+		"http://www.theodora.com/country_digraphs.html" ,
+		"http://www.citypopulation.de/world/Agglomerations.html" ,
+		"http://www.mongabay.com/cities_urban_01.htm" ,
+		"http://en.wikipedia.org/wiki/Urban_agglomeration" ,
+		"http://www.worldtimezone.com/standard.html"
+	] , 
+	"metros" : [
+		{
+			"code" : "CMI" ,
+			"name" : "Champaign" ,
+			"country" : "US" ,
+			"continent" : "North America" ,
+			"timezone" : -6 ,
+			"coordinates" : {"N" : 40, "W" : 88} ,
+			"population" : 226000 ,
+			"region" : 1
+		}
+	] ,
+	"routes" : [
+		{
+			"ports" : ["CMI" , "LAX"],
+			"distance" : 2736
+		} , {
+			"ports" : ["CMI" , "SFO"],
+			"distance" : 2955
+		} , {
+			"ports" : ["CMI" , "MEX"],
+			"distance" : 2518
+		} , {
+			"ports" : ["CMI" , "MIA"],
+			"distance" : 1757
+		} , {
+			"ports" : ["CMI" , "ATL"],
+			"distance" : 785
+		} , {
+			"ports" : ["CMI" , "WAS"],
+			"distance" : 975
+		} , {
+			"ports" : ["CMI" , "YYZ"],
+			"distance" : 831
+		} , {
+			"ports" : ["CMI" , "NYC"],
+			"distance" : 1208
+		} ,	{
+			"ports" : ["CMI" , "CHI"],
+			"distance" : 198
+		}
+	]
+}

@@ -16,7 +16,7 @@ class TestGraphFunctions(unittest.TestCase):
 
     def test_create_graph(self):
         """ Tests creating a graph by checking number of metros and number of connections. """
-        test_airline = create_graph_from_file(TEST_FILE)
+        test_airline = add_file_data_to_graph(map_file_path=TEST_FILE)
         metros = test_airline.get_all_nodes()
         self.assertEqual(len(metros), 4)
         for city_code in metros:
@@ -29,7 +29,7 @@ class TestGraphFunctions(unittest.TestCase):
 
     def test_get_map(self):
         """ Test map url to confirm it is correct by checking connections at end of url. """
-        test_airline = create_graph_from_file(TEST_FILE)
+        test_airline = add_file_data_to_graph(map_file_path=TEST_FILE)
         url = get_map_of_routes(test_airline, False)
         url_connections = url.split("=")[1].split(",")
         url_connections.sort()
@@ -37,7 +37,7 @@ class TestGraphFunctions(unittest.TestCase):
 
     def test_get_all_cities(self):
         """ Test that all cities are returned correctly. """
-        test_airline = create_graph_from_file(TEST_FILE)
+        test_airline = add_file_data_to_graph(map_file_path=TEST_FILE)
         cities = get_all_cities(test_airline)
         for i in range(len(cities)):
             self.assertEqual(cities[i][0], CITY_CODES[i])
@@ -45,7 +45,7 @@ class TestGraphFunctions(unittest.TestCase):
 
     def test_hub_cities(self):
         """ Test all hub cities are determined correctly based on threshold numbers. """
-        test_airline = create_graph_from_file(TEST_FILE)
+        test_airline = add_file_data_to_graph(map_file_path=TEST_FILE)
         hub_string_3_threshold = get_hub_cities(test_airline, 3)
         self.assertEqual(hub_string_3_threshold, "3 routes: Lima\n")
         hub_string_2_threshold = get_hub_cities(test_airline, 2)
@@ -55,43 +55,43 @@ class TestGraphFunctions(unittest.TestCase):
 
     def test_cities_by_continent(self):
         """ Test that cities are grouped correctly by continent. """
-        test_airline = create_graph_from_file(TEST_FILE)
+        test_airline = add_file_data_to_graph(map_file_path=TEST_FILE)
         continent_separated_string = get_cities_by_continent(test_airline)
         self.assertEqual(continent_separated_string, "North America: Mexico City\n"
                                                      "South America: Santiago, Bogota, Lima\n")
 
     def test_average_population(self):
         """ Test that the average population is determined correctly. """
-        test_airline = create_graph_from_file(TEST_FILE)
+        test_airline = add_file_data_to_graph(map_file_path=TEST_FILE)
         average_distance_string = get_average_distance(test_airline)
         self.assertEqual(average_distance_string, "Average Distance of Flights: 2854")
 
     def test_smallest_city(self):
         """ Test that the smallest city is found correctly. """
-        test_airline = create_graph_from_file(TEST_FILE)
+        test_airline = add_file_data_to_graph(map_file_path=TEST_FILE)
         smallest_city_string = get_smallest_city(test_airline)
         self.assertEqual(smallest_city_string, "Smallest City: Santiago with population 6000000")
 
     def test_biggest_city(self):
         """ Test that the biggest city is found correctly. """
-        test_airline = create_graph_from_file(TEST_FILE)
+        test_airline = add_file_data_to_graph(map_file_path=TEST_FILE)
         biggest_city_string = get_biggest_city(test_airline)
         self.assertEqual(biggest_city_string, "Biggest City: Mexico City with population 23400000")
 
     def test_average_distance(self):
         """ Test that the average distance is found correctly. """
-        test_airline = create_graph_from_file(TEST_FILE)
+        test_airline = add_file_data_to_graph(map_file_path=TEST_FILE)
         average_distance_string = get_average_distance(test_airline)
         self.assertEqual(average_distance_string, "Average Distance of Flights: 2854")
 
     def test_shortest_flight(self):
         """ Test that the shortest flight is found correctly. """
-        test_airline = create_graph_from_file(TEST_FILE)
+        test_airline = add_file_data_to_graph(map_file_path=TEST_FILE)
         shortest_flight_string = get_shortest_single_flight(test_airline)
         self.assertEqual(shortest_flight_string, "Shortest Flight: from Bogota to Lima (1879)")
 
     def test_longest_flight(self):
         """ Test that the longest flight is found correctly. """
-        test_airline = create_graph_from_file(TEST_FILE)
+        test_airline = add_file_data_to_graph(map_file_path=TEST_FILE)
         longest_flight_string = get_longest_single_flight(test_airline)
         self.assertEqual(longest_flight_string, "Longest Flight: from Mexico City to Lima (4231)")
