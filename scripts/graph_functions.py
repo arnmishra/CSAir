@@ -4,6 +4,7 @@ import webbrowser
 import json
 import sys
 import math
+from Queue import PriorityQueue
 
 from framework.graph import Graph
 
@@ -260,7 +261,8 @@ def download_data_to_json(airline_network):
         compiled_json["metros"].append(node_data)
         connections = all_nodes[city_code].get_connected_nodes()
         for destination_code in connections:
-            route = {"ports": [node_data["code"], destination_code], "distance": connections[destination_code]}
+            route = {"ports": [node_data["code"], destination_code], "distance": connections[destination_code],
+                     "bidirectional": False}
             compiled_json["routes"].append(route)
     with open("data/output_data.json", 'w') as json_file:
         json.dump(compiled_json, json_file, indent=4, sort_keys=True)
@@ -282,11 +284,11 @@ def get_route_data(airline_network, city_codes):
             distance = connections[city_code]
             total_distance += distance
             total_cost += distance * cost_per_kilometer
-            if cost_per_kilometer >= 0.5:
-                cost_per_kilometer -= 0.5
+            if cost_per_kilometer >= 0.05:
+                cost_per_kilometer -= 0.05
             if distance >= 400:
                 acceleration_time = math.sqrt((2*200)/ACCELERATION)  # t = sqrt(2d/a) in minutes
-                cruising_time = (distance - 400.0)/(750 / 60)  # t = d/v in minutes
+                cruising_time = (distance - 400.0)/(750.0 / 60)  # t = d/v in minutes
                 total_time += 2*acceleration_time + cruising_time  # cruising time + acceleration + deceleration
             else:
                 acceleration_time = math.sqrt((2*distance/2)/ACCELERATION)  # in minutes
@@ -304,5 +306,47 @@ def get_route_data(airline_network, city_codes):
 
 
 def get_shortest_path(airline_network, start_city, end_city):
-    #  Djikstras
-    print airline_network, start_city, end_city
+    all_cities = airline_network.get_all_nodes()
+    distance = {}
+    previous_node = {}
+    visited = {}
+    queue = PriorityQueue()
+    for city_code in all_cities:
+        if city_code == start_city:
+            current_city = start_city
+            current_node = all_cities[current_city]
+            visited[city_code] = False
+            distance[start_city] = 0
+        else:
+            distance[city_code] = float("inf")
+            previous_node[city_code] = None
+            visited[city_code] = False
+
+    connected_cities = current_node.get_connected_nodes()
+    for connected_code in connected_cities:
+        print connected_cities[connected_code], connected_code
+        queue.put([connected_cities[connected_code], connected_code, current_city])
+
+    while not queue.empty():
+        visited[current_city] = True
+        closest_values = queue.get()
+        connected_city = closest_values[1]
+        if distance[connected_city] > closest_values[0]:
+            distance[connected_city] = closest_values[0]
+            previous_node[connected_city] = closest_values[2]
+        current_city = connected_city
+        if current_city == end_city:
+            break
+        current_node = airline_network.get_node(current_city)
+        connected_cities = current_node.get_connected_nodes()
+        for connected_code in connected_cities:
+            if not visited[connected_code]:
+                queue.put([distance[current_city] + connected_cities[connected_code], connected_code, current_city])
+
+    route = []
+    current_city = end_city
+    while current_city != start_city:
+        route.insert(0, current_city)
+        current_city = previous_node[current_city]
+    route.insert(0, start_city)
+    return str(route) + " " + str(distance[end_city])

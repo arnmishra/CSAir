@@ -136,7 +136,7 @@ def get_statistic(statistic_code, airline_network):
     elif statistic_code == 9:
         start_route = raw_input("Enter the start city: ")
         end_route = raw_input("Enter the destination city: ")
-        get_shortest_path(airline_network, start_route, end_route)
+        return get_shortest_path(airline_network, start_route, end_route)
 
 
 def make_modification(modification_code, airline_network):
