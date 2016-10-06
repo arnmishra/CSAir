@@ -219,6 +219,11 @@ def get_longest_single_flight(airline_network):
 
 
 def delete_city(airline_network, delete_city_code):
+    """ Delete a city and all references to it from the network
+
+    :param airline_network: Graph Object with CSAir Information
+    :param delete_city_code: City Code of City to be Deleted
+    """
     airline_network.delete_node(delete_city_code)
     all_cities = airline_network.get_all_nodes()
     for city_code in all_cities:
@@ -228,31 +233,48 @@ def delete_city(airline_network, delete_city_code):
 
 
 def delete_route(airline_network, start_city_code, end_city_code, bidirectional):
+    """ Delete a route in one or both directions as determined by the bidirectional flag
+
+    :param airline_network: Graph Object with CSAir Information
+    :param start_city_code: Starting City of the Route
+    :param end_city_code: Ending City of the Route
+    :param bidirectional: Whether to delete both directions of the route or not
+    """
     airline_network.delete_connection(start_city_code, end_city_code)
     if bidirectional.lower() == "y":
         airline_network.delete_connection(end_city_code, start_city_code)
 
 
 def add_city(airline_network, city_data):
+    """ Add a city and its metadata to the network.
+
+    :param airline_network: Graph Object with CSAir Information
+    :param city_data: Data about new city
+    """
     city_code = city_data["code"]
-    if not city_code:
-        return False
     airline_network.add_node(city_code, city_data)
 
 
 def add_route(airline_network, bidirectional, start_route, end_route, weight):
+    """Adds a route to the network
+
+    :param airline_network: Graph Object with CSAir Information
+    :param bidirectional: Whether or not to make the route bidirectional
+    :param start_route: Starting city
+    :param end_route: Ending city
+    :param weight: Distance of the route
+    """
     airline_network.add_connection(start_route, end_route, weight)
     if bidirectional.lower() == "y":
         airline_network.add_connection(end_route, start_route, weight)
 
 
 def download_data_to_json(airline_network):
-    """
+    """Re-download all the data to an output json file.
+
     http://stackoverflow.com/questions/12309269/how-do-i-write-json-data-to-a-file-in-python
     http://stackoverflow.com/questions/12943819/how-to-python-prettyprint-a-json-file
-    :param airline_network:
-    :param json_file_name:
-    :return:
+    :param airline_network: Graph Object with CSAir Information
     """
     compiled_json = {"metros": [], "routes": []}
     all_nodes = airline_network.get_all_nodes()
@@ -269,6 +291,14 @@ def download_data_to_json(airline_network):
 
 
 def get_route_data(airline_network, city_codes):
+    """ Get specific information about a route across multiple cities. Specifically,
+    get the total distance, total cost, and total time of the journey using given
+    information about cost and acceleration of the flight.
+
+    :param airline_network: Graph Object with CSAir Information
+    :param city_codes: List of city codes in the route from start to finish.
+    :return: String explaining the metadata about the route
+    """
     if len(city_codes) < 2:
         return False
     total_distance = 0
@@ -279,52 +309,66 @@ def get_route_data(airline_network, city_codes):
     start_city = airline_network.get_node(start_code)
     for i in range(1, len(city_codes)):
         city_code = city_codes[i]
-        connections = start_city.get_connected_nodes()
-        if city_code in connections:
-            distance = connections[city_code]
-            total_distance += distance
-            total_cost += distance * cost_per_kilometer
-            if cost_per_kilometer >= 0.05:
-                cost_per_kilometer -= 0.05
-            if distance >= 400:
-                acceleration_time = math.sqrt((2*200)/ACCELERATION)  # t = sqrt(2d/a) in minutes
-                cruising_time = (distance - 400.0)/(750.0 / 60)  # t = d/v in minutes
-                total_time += 2*acceleration_time + cruising_time  # cruising time + acceleration + deceleration
-            else:
-                acceleration_time = math.sqrt((2*distance/2)/ACCELERATION)  # in minutes
-                total_time += 2*acceleration_time  # acceleration + deceleration
-            if i != len(city_codes)-1:
-                layover_time = 120 - 10*(len(connections) - 1)  # in minutes
-                if layover_time < 0:
-                    layover_time = 0
-                total_time += layover_time
-            start_city = airline_network.get_node(city_code)
-        else:
-            return False
+        start_connections = start_city.get_connected_nodes()
+        current_city = airline_network.get_node(city_code)
+        current_connections = current_city.get_connected_nodes()
+        if city_code not in start_connections:
+            return "Invalid Route"
+        distance = start_connections[city_code]
+        total_distance += distance
+        total_cost += distance * cost_per_kilometer
+        if cost_per_kilometer >= 0.05:
+            cost_per_kilometer -= 0.05
+        total_time += calculate_time(distance, city_codes, current_connections, i)
+        start_city = airline_network.get_node(city_code)
     return "Total Distance = %i\nTotal Cost = $%.2f\nTotal Time = %ihrs %imins" \
            % (total_distance, total_cost, total_time/60, total_time % 60)
 
 
-def get_shortest_path(airline_network, start_city, end_city):
-    all_cities = airline_network.get_all_nodes()
-    distance = {}
-    previous_node = {}
-    visited = {}
-    queue = PriorityQueue()
-    for city_code in all_cities:
-        if city_code == start_city:
-            current_city = start_city
-            current_node = all_cities[current_city]
-            visited[city_code] = False
-            distance[start_city] = 0
-        else:
-            distance[city_code] = float("inf")
-            previous_node[city_code] = None
-            visited[city_code] = False
+def calculate_time(distance, city_codes, current_connections, i):
+    """ Helper function to calculate the time between cities and the layover time.
+    The acceleration is understood to take 200 meters to hit 750 kmph. The time is
+    returned in minutes.
 
+    :param distance: Distance in this portion of the route.
+    :param city_codes: A list of the codes in the route.
+    :param current_connections: The flight connections from the current city.
+    :param i: Which city code is currently being considered
+    :return: The time it takes to travel the given distance
+    """
+    total_time = 0
+    if distance >= 400:
+        acceleration_time = math.sqrt((2 * 200) / ACCELERATION)  # t = sqrt(2d/a) in minutes
+        cruising_time = (distance - 400.0) / (750.0 / 60)  # t = d/v in minutes
+        total_time += 2 * acceleration_time + cruising_time  # cruising time + acceleration + deceleration
+    else:
+        acceleration_time = math.sqrt((2 * distance / 2) / ACCELERATION)  # in minutes
+        total_time += 2 * acceleration_time  # acceleration + deceleration
+    if i != len(city_codes) - 1:
+        layover_time = 120 - 10 * (len(current_connections) - 1)  # in minutes
+        if layover_time < 0:
+            layover_time = 0
+        total_time += layover_time
+    return total_time
+
+
+def get_shortest_path(airline_network, start_city, end_city):
+    """ Dijsktra's algorithm implementation using a Priority Queue to sort shortest paths,
+    a distance dictionary to store the shortest distance to each city, the previous node for
+    each city to get there in that distance, and whether or not each city has been visited.
+
+    :param airline_network: Graph Object with CSAir Information
+    :param start_city: The starting city of the route
+    :param end_city: The end city of the route
+    :return: The route taken and the metadata about the route.
+    """
+    all_cities = airline_network.get_all_nodes()
+    queue = PriorityQueue()
+    distance, previous_node, visited = initialize_dictionaries(all_cities, start_city)
+    current_city = start_city
+    current_node = all_cities[current_city]
     connected_cities = current_node.get_connected_nodes()
     for connected_code in connected_cities:
-        print connected_cities[connected_code], connected_code
         queue.put([connected_cities[connected_code], connected_code, current_city])
 
     while not queue.empty():
@@ -349,4 +393,27 @@ def get_shortest_path(airline_network, start_city, end_city):
         route.insert(0, current_city)
         current_city = previous_node[current_city]
     route.insert(0, start_city)
-    return str(route) + " " + str(distance[end_city])
+    route_data = get_route_data(airline_network, route)
+    return str(route) + "\n" + route_data
+
+
+def initialize_dictionaries(all_cities, start_city):
+    """ Helper function to initialize all the dictionaries regarding visited, distance,
+    and previous nodes.
+
+    :param all_cities: All the cities in the network
+    :param start_city: The start city of the route
+    :return: The initialized dictionaries
+    """
+    distance = {}
+    previous_node = {}
+    visited = {}
+    for city_code in all_cities:
+        if city_code == start_city:
+            visited[city_code] = False
+            distance[start_city] = 0
+        else:
+            distance[city_code] = float("inf")
+            previous_node[city_code] = None
+            visited[city_code] = False
+    return distance, previous_node, visited

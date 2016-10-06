@@ -180,8 +180,16 @@ def make_modification(modification_code, airline_network):
 
 
 def print_message(message):
+    """ Print good message in green.
+
+    :param message: to be printed
+    """
     print(Fore.GREEN + message + Fore.RESET)
 
 
 def print_error(message):
+    """ Print error message in red.
+
+    :param message: to be printed
+    """
     print(Fore.RED + message + Fore.RESET)
