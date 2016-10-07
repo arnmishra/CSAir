@@ -27,19 +27,6 @@
             "timezone": 1
         }, 
         {
-            "code": "MIA", 
-            "continent": "North America", 
-            "coordinates": {
-                "N": 26, 
-                "W": 80
-            }, 
-            "country": "US", 
-            "name": "Miami", 
-            "population": 5400000, 
-            "region": 1, 
-            "timezone": -5
-        }, 
-        {
             "code": "CCU", 
             "continent": "Asia", 
             "coordinates": {
@@ -378,6 +365,16 @@
             "timezone": 8
         }, 
         {
+            "code": "ABC", 
+            "continent": "North America", 
+            "coordinates": "W:3 S:2", 
+            "country": "USA", 
+            "name": "abc", 
+            "population": 10000000000, 
+            "region": "1", 
+            "timezone": "1"
+        }, 
+        {
             "code": "ESS", 
             "continent": "Europe", 
             "coordinates": {
@@ -696,41 +693,6 @@
             ]
         }, 
         {
-            "distance": 957, 
-            "ports": [
-                "MIA", 
-                "ATL"
-            ]
-        }, 
-        {
-            "distance": 1483, 
-            "ports": [
-                "MIA", 
-                "WAS"
-            ]
-        }, 
-        {
-            "distance": 2053, 
-            "ports": [
-                "MIA", 
-                "MEX"
-            ]
-        }, 
-        {
-            "distance": 1757, 
-            "ports": [
-                "MIA", 
-                "CMI"
-            ]
-        }, 
-        {
-            "distance": 2425, 
-            "ports": [
-                "MIA", 
-                "BOG"
-            ]
-        }, 
-        {
             "distance": 1382, 
             "ports": [
                 "CCU", 
@@ -777,13 +739,6 @@
             "ports": [
                 "LIM", 
                 "BOG"
-            ]
-        }, 
-        {
-            "distance": 957, 
-            "ports": [
-                "ATL", 
-                "MIA"
             ]
         }, 
         {
@@ -1074,13 +1029,6 @@
             ]
         }, 
         {
-            "distance": 2425, 
-            "ports": [
-                "BOG", 
-                "MIA"
-            ]
-        }, 
-        {
             "distance": 1879, 
             "ports": [
                 "BOG", 
@@ -1141,13 +1089,6 @@
             "ports": [
                 "SAO", 
                 "BOG"
-            ]
-        }, 
-        {
-            "distance": 1757, 
-            "ports": [
-                "CMI", 
-                "MIA"
             ]
         }, 
         {
@@ -1711,13 +1652,6 @@
             ]
         }, 
         {
-            "distance": 1483, 
-            "ports": [
-                "WAS", 
-                "MIA"
-            ]
-        }, 
-        {
             "distance": 334, 
             "ports": [
                 "WAS", 
@@ -2044,13 +1978,6 @@
             "ports": [
                 "MEX", 
                 "CMI"
-            ]
-        }, 
-        {
-            "distance": 2053, 
-            "ports": [
-                "MEX", 
-                "MIA"
             ]
         }, 
         {

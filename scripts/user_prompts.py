@@ -186,6 +186,8 @@ def make_modification(modification_code, airline_network):
                 continue  # Don't modify the City Code.
             new_data = raw_input("Current city's %s = %s. Replace with: " % (data, city_data[data]))
             if new_data:
+                if data == "population":
+                    new_data = int(new_data)
                 city_data[data] = new_data
 
 
