@@ -18,14 +18,59 @@ class TestGraph(unittest.TestCase):
         self.assertEqual(node.get_data(), test_node.get_data())
 
     def test_add_connection(self):
-        """ Test that connections can be created and all nodes can be returned correctly. """
+        """ Test that connections can be created properly. """
         graph = Graph()
-        graph.add_node("first_test_key", "first_test_data")
-        graph.add_node("second_test_key", "second_test_data")
-        graph.add_connection("first_test_key", "second_test_key", 0)
+        start_key = "first_test_key"
+        start_data = "first_test_data"
+        end_key = "second_test_key"
+        end_data = "second_test_data"
+        graph.add_node(start_key, start_data)
+        graph.add_node(end_key, end_data)
+        graph.add_connection(start_key, end_key, 0)
+        start_node = graph.get_node(start_key)
+        connected = start_node.get_connected_nodes()
+        self.assertEqual(len(connected), 1)
+        self.assertTrue(end_key in connected)
+
+    def test_delete_connection(self):
+        """ Test that a connection can be successfully deleted between nodes. """
+        graph = Graph()
+        start_key = "first_test_key"
+        start_data = "first_test_data"
+        end_key = "second_test_key"
+        end_data = "second_test_data"
+        graph.add_node(start_key, start_data)
+        graph.add_node(end_key, end_data)
+        graph.add_connection(start_key, end_key, 0)
+        graph.delete_connection(start_key, end_key)
         all_nodes = graph.get_all_nodes()
         for key in all_nodes:
-            if key == "first_test_key":
-                self.assertEqual(all_nodes["first_test_key"].get_data(), "first_test_data")
-            elif key == "second_test_key":
-                self.assertEqual(all_nodes["second_test_key"].get_data(), "second_test_data")
+            node = all_nodes[key]
+            self.assertEqual(len(node.get_connected_nodes()), 0)
+
+    def test_delete_node(self):
+        """ Test that a node can be deleted correctly. """
+        graph = Graph()
+        start_key = "first_test_key"
+        start_data = "first_test_data"
+        end_key = "second_test_key"
+        end_data = "second_test_data"
+        graph.add_node(start_key, start_data)
+        graph.add_node(end_key, end_data)
+        graph.add_connection(start_key, end_key, 0)
+        graph.delete_node(end_key)
+        all_nodes = graph.get_all_nodes()
+        self.assertTrue(len(all_nodes) == 1)
+        deleted_node = graph.get_node(end_key)
+        self.assertFalse(deleted_node)
+
+    def test_modify_node(self):
+        """ Test that a node's data can be modified. """
+        graph = Graph()
+        key = "first_test_key"
+        data = "first_test_data"
+        modified_data = "second_test_data"
+        graph.add_node(key, data)
+        graph.set_node(key, modified_data)
+        node = graph.get_node(key)
+        self.assertEqual(node.get_data(), modified_data)

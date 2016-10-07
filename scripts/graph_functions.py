@@ -12,7 +12,7 @@ MAP_BASE_URL = "http://www.gcmap.com/mapui?P="
 ACCELERATION = ((750.0/60)**2)/(2*200)  # a = v^2/(2*d) in km/min^2
 
 
-def add_file_data_to_graph(airline_network=Graph(), map_file_path="data/map_data.json"):
+def add_file_data_to_graph(airline_network=Graph(), map_file_path="data/output_data.json"):
     """ Creates graph object from JSON File with data about airline mappings. This
     includes making each connection bidirectional between the cities.
 
@@ -26,11 +26,16 @@ def add_file_data_to_graph(airline_network=Graph(), map_file_path="data/map_data
         print e
         sys.exit(1)
     map_data = json.load(map_data_file)
+    if "unidirectional" in map_data:
+        unidirectional = map_data["unidirectional"]
+    else:
+        unidirectional = False
     for metro in map_data["metros"]:
         airline_network.add_node(metro["code"], metro)
     for route in map_data["routes"]:
         airline_network.add_connection(route["ports"][0], route["ports"][1], route["distance"])
-        airline_network.add_connection(route["ports"][1], route["ports"][0], route["distance"])
+        if not unidirectional:
+            airline_network.add_connection(route["ports"][1], route["ports"][0], route["distance"])
     return airline_network
 
 
@@ -276,15 +281,14 @@ def download_data_to_json(airline_network):
     http://stackoverflow.com/questions/12943819/how-to-python-prettyprint-a-json-file
     :param airline_network: Graph Object with CSAir Information
     """
-    compiled_json = {"metros": [], "routes": []}
+    compiled_json = {"unidirectional": True, "metros": [], "routes": []}
     all_nodes = airline_network.get_all_nodes()
     for city_code in all_nodes:
         node_data = all_nodes[city_code].get_data()
         compiled_json["metros"].append(node_data)
         connections = all_nodes[city_code].get_connected_nodes()
         for destination_code in connections:
-            route = {"ports": [node_data["code"], destination_code], "distance": connections[destination_code],
-                     "bidirectional": False}
+            route = {"ports": [node_data["code"], destination_code], "distance": connections[destination_code]}
             compiled_json["routes"].append(route)
     with open("data/output_data.json", 'w') as json_file:
         json.dump(compiled_json, json_file, indent=4, sort_keys=True)
@@ -352,6 +356,28 @@ def calculate_time(distance, city_codes, current_connections, i):
     return total_time
 
 
+def initialize_dictionaries(all_cities, start_city):
+    """ Helper function to initialize all the dictionaries regarding visited, distance,
+    and previous nodes.
+
+    :param all_cities: All the cities in the network
+    :param start_city: The start city of the route
+    :return: The initialized dictionaries
+    """
+    distance = {}
+    previous_node = {}
+    visited = {}
+    for city_code in all_cities:
+        if city_code == start_city:
+            visited[city_code] = False
+            distance[start_city] = 0
+        else:
+            distance[city_code] = float("inf")
+            previous_node[city_code] = None
+            visited[city_code] = False
+    return distance, previous_node, visited
+
+
 def get_shortest_path(airline_network, start_city, end_city):
     """ Dijsktra's algorithm implementation using a Priority Queue to sort shortest paths,
     a distance dictionary to store the shortest distance to each city, the previous node for
@@ -395,25 +421,3 @@ def get_shortest_path(airline_network, start_city, end_city):
     route.insert(0, start_city)
     route_data = get_route_data(airline_network, route)
     return str(route) + "\n" + route_data
-
-
-def initialize_dictionaries(all_cities, start_city):
-    """ Helper function to initialize all the dictionaries regarding visited, distance,
-    and previous nodes.
-
-    :param all_cities: All the cities in the network
-    :param start_city: The start city of the route
-    :return: The initialized dictionaries
-    """
-    distance = {}
-    previous_node = {}
-    visited = {}
-    for city_code in all_cities:
-        if city_code == start_city:
-            visited[city_code] = False
-            distance[start_city] = 0
-        else:
-            distance[city_code] = float("inf")
-            previous_node[city_code] = None
-            visited[city_code] = False
-    return distance, previous_node, visited

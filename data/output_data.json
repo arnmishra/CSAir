@@ -739,13 +739,6 @@
             ]
         }, 
         {
-            "distance": 2453, 
-            "ports": [
-                "LIM", 
-                "SCL"
-            ]
-        }, 
-        {
             "distance": 4231, 
             "ports": [
                 "LIM", 
@@ -1942,5 +1935,6 @@
                 "CHI"
             ]
         }
-    ]
+    ], 
+    "unidirectional": true
 }

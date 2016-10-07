@@ -95,3 +95,58 @@ class TestGraphFunctions(unittest.TestCase):
         test_airline = add_file_data_to_graph(map_file_path=TEST_FILE)
         longest_flight_string = get_longest_single_flight(test_airline)
         self.assertEqual(longest_flight_string, "Longest Flight: from Mexico City to Lima (4231)")
+
+    def test_delete_city(self):
+        """ Test that a city and all ingoing and outgoing routes are deleted. """
+        test_airline = add_file_data_to_graph(map_file_path=TEST_FILE)
+        delete_city(test_airline, "LIM")
+        cities = test_airline.get_all_nodes()
+        self.assertFalse(test_airline.get_node("LIM"))
+        for city_code in cities:
+            city = test_airline.get_node(city_code)
+            self.assertEqual(len(city.get_connected_nodes()), 0)
+
+    def test_delete_route(self):
+        """ Test that deleting a route removes it from the network. """
+        test_airline = add_file_data_to_graph(map_file_path=TEST_FILE)
+        delete_route(test_airline, "SCL", "LIM", "n")
+        delete_route(test_airline, "LIM", "MEX", "y")
+
+        santiago = test_airline.get_node("SCL")
+        lima = test_airline.get_node("LIM")
+        mexico = test_airline.get_node("MEX")
+
+        self.assertTrue("LIM" not in santiago.get_connected_nodes())
+        self.assertTrue("SCL" in lima.get_connected_nodes())
+        self.assertTrue("MEX" not in lima.get_connected_nodes())
+        self.assertTrue("LIM" not in mexico.get_connected_nodes())
+
+    def test_add_city(self):
+        """ Test that adding a new city works properly. """
+        test_airline = add_file_data_to_graph(airline_network=Graph(), map_file_path=TEST_FILE)
+        add_city(test_airline, {"code": "test_data"})
+        all_nodes = test_airline.get_all_nodes()
+        self.assertTrue("test_data" in all_nodes)
+
+    def test_add_route(self):
+        """ Test that adding a new route works properly. """
+        test_airline = add_file_data_to_graph(airline_network=Graph(), map_file_path=TEST_FILE)
+        add_route(test_airline, "n", "SCL", "MEX", 100)
+        add_route(test_airline, "y", "SCL", "BOG", 100)
+
+        santiago = test_airline.get_node("SCL")
+        bogota = test_airline.get_node("BOG")
+        mexico = test_airline.get_node("MEX")
+
+        self.assertTrue("MEX" in santiago.get_connected_nodes())
+        self.assertTrue("SCL" not in mexico.get_connected_nodes())
+        self.assertTrue("BOG" in santiago.get_connected_nodes())
+        self.assertTrue("SCL" in bogota.get_connected_nodes())
+
+    def test_get_shortest_path(self):
+        """ Test to confirm that the correct path, distance, cost, and time are calculated for a Path. """
+        test_airline = add_file_data_to_graph(airline_network=Graph(), map_file_path=TEST_FILE)
+        expected_result = "['BOG', u'LIM', 'SCL']\nTotal Distance = 4332\n" \
+                          "Total Cost = $1393.55\nTotal Time = 8hrs 30mins"
+        actual_result = get_shortest_path(test_airline, "BOG", "SCL")
+        self.assertEqual(expected_result, actual_result)
