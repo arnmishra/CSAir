@@ -24,7 +24,7 @@ def add_file_data_to_graph(airline_network=Graph(), map_file_path="data/output_d
         map_data_file = open(map_file_path, "r")
     except Exception, e:
         print e
-        sys.exit(1)
+        return False
     map_data = json.load(map_data_file)
     if "unidirectional" in map_data:
         unidirectional = map_data["unidirectional"]
@@ -304,7 +304,7 @@ def get_route_data(airline_network, city_codes):
     :return: String explaining the metadata about the route
     """
     if len(city_codes) < 2:
-        return False
+        return "Not enough city codes entered"
     total_distance = 0
     total_cost = 0
     total_time = 0
@@ -312,9 +312,13 @@ def get_route_data(airline_network, city_codes):
     start_code = city_codes[0]
     start_city = airline_network.get_node(start_code)
     for i in range(1, len(city_codes)):
+        if not start_city:
+            return "Invalid City Code: " + start_city
         city_code = city_codes[i]
         start_connections = start_city.get_connected_nodes()
         current_city = airline_network.get_node(city_code)
+        if not current_city:
+            return "Invalid City Code: " + city_code
         current_connections = current_city.get_connected_nodes()
         if city_code not in start_connections:
             return "Invalid Route"

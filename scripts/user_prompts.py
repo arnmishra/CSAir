@@ -10,7 +10,8 @@ INITIAL_PROMPT = ("\n0 - List of all cities\n"
                   "3 - Get Map of all Routes in CSAir Network\n"
                   "4 - Modify the Network\n"
                   "5 - Export back to JSON\n"
-                  "6 - Add new JSON File Data to Network\n")
+                  "6 - Add new JSON File Data to Network\n"
+                  "7 - End the program.\n")
 
 STATISTIC_PROMPT = ("\n0 - Longest Single Flight\n"
                     "1 - Shortest Single Flight\n"
@@ -35,7 +36,9 @@ def get_hub_city_threshold():
 
     :return: Minimum number of routes
     """
-    min_hub = int(raw_input("Minimum number of routes for hub: "))
+    min_hub = -1
+    while min_hub < 0:
+        min_hub = get_int_input("Minimum number of routes for hub: ")
     return min_hub
 
 
@@ -54,7 +57,7 @@ def print_individual_city(airline_network):
 
     :param airline_network: Graph object of CSAir flights.
     """
-    city_code = raw_input("Enter the city code for which you want the information: ").strip()
+    city_code = get_city_code_input("Enter the city code for which you want the information: ")
     metro = airline_network.get_node(city_code)
     if not metro:
         print_error("Incorrect City Code: " + city_code)
@@ -75,23 +78,26 @@ def prompt_user_for_input(airline_network):
 
     :param airline_network:
     """
-    response = raw_input(INITIAL_PROMPT)
-    while not response or int(response) > 6 or int(response) < 0:
-        response = raw_input()
-    response = int(response)
+    response = -1
+    while response > 7 or response < 0:
+        response = get_int_input(INITIAL_PROMPT)
 
     if response == 0:
         print_all_cities(airline_network)
     elif response == 1:
         print_individual_city(airline_network)
     elif response == 2:
-        statistic_code = int(raw_input(STATISTIC_PROMPT))
+        statistic_code = -1
+        while statistic_code < 0 or statistic_code > 9:
+            statistic_code = get_int_input(STATISTIC_PROMPT)
         print_message(get_statistic(statistic_code, airline_network))
     elif response == 3:
         url = get_map_of_routes(airline_network)
         print_message(url)
     elif response == 4:
-        modification_code = int(raw_input(MODIFICATION_PROMPT))
+        modification_code = -1
+        while modification_code < 0 or modification_code > 4:
+            modification_code = get_int_input(MODIFICATION_PROMPT)
         make_modification(modification_code, airline_network)
     elif response == 5:
         download_data_to_json(airline_network)
@@ -99,6 +105,9 @@ def prompt_user_for_input(airline_network):
     elif response == 6:
         file_name = raw_input("Put new JSON file in data folder. Enter the name of the JSON File: ")
         add_file_data_to_graph(airline_network, "data/" + file_name + ".json")
+    elif response == 7:
+        return False
+    return True
 
 
 def get_statistic(statistic_code, airline_network):
@@ -128,14 +137,14 @@ def get_statistic(statistic_code, airline_network):
     elif statistic_code == 8:
         city_codes = []
         print "Enter city codes one at a time in order of your route. Enter 'done' when you are finished."
-        input_code = raw_input("Enter a city code: ")
+        input_code = get_city_code_input("Enter a city code: ")
         while input_code.lower() != "done":
             city_codes.append(input_code)
-            input_code = raw_input("Enter a city code: ")
+            input_code = get_city_code_input("Enter a city code: ")
         return get_route_data(airline_network, city_codes)
     elif statistic_code == 9:
-        start_route = raw_input("Enter the start city: ")
-        end_route = raw_input("Enter the destination city: ")
+        start_route = get_city_code_input("Enter the start city: ")
+        end_route = get_city_code_input("Enter the destination city: ")
         return get_shortest_path(airline_network, start_route, end_route)
 
 
@@ -147,13 +156,12 @@ def make_modification(modification_code, airline_network):
         :return: The data the user queried for
         """
     if modification_code == 0:
-        city_code = raw_input("Enter the City Code of the City you want to remove: ")
+        city_code = get_city_code_input("Enter the City Code of the City you want to remove: ")
         delete_city(airline_network, city_code)
     elif modification_code == 1:
-        start_route = raw_input("Enter the start of the route you want to remove: ")
-        end_route = raw_input("Enter the destination of the route you want to remove: ")
-        bidirectional = raw_input("Do you want to remove both directions of the route? (Y/N): ")
-        # Remove the city if there aren't any ingoing or outgoing connections
+        start_route = get_city_code_input("Enter the start of the route you want to remove: ")
+        end_route = get_city_code_input("Enter the destination of the route you want to remove: ")
+        bidirectional = get_bidirectional_prompt("Do you want to remove both directions of the route? (Y/N): ")
         delete_route(airline_network, start_route, end_route, bidirectional)
     elif modification_code == 2:
         city_data = {"code": None, "name": None, "country": None, "continent": None, "timezone": None,
@@ -162,13 +170,15 @@ def make_modification(modification_code, airline_network):
             city_data[data] = raw_input("Enter the new city's %s: " % data)
         add_city(airline_network, city_data)
     elif modification_code == 3:
-        start_route = raw_input("Enter the start of the route you want to add: ")
-        end_route = raw_input("Enter the destination of the route you want to add: ")
-        weight = int(raw_input("Enter the distance of the route: "))
-        bidirectional = raw_input("Do you want to add both directions of the route? (Y/N): ")
+        start_route = get_city_code_input("Enter the start of the route you want to add: ")
+        end_route = get_city_code_input("Enter the destination of the route you want to add: ")
+        weight = -1
+        while weight < 0:
+            weight = get_int_input("Enter the distance of the route: ")
+        bidirectional = get_bidirectional_prompt("Do you want to add both directions of the route? (Y/N): ")
         add_route(airline_network, bidirectional, start_route, end_route, weight)
     elif modification_code == 4:
-        city_code = raw_input("Enter the City Code of the City you want to modify: ")
+        city_code = get_city_code_input("Enter the City Code of the City you want to modify: ")
         city_data = airline_network.get_node(city_code).get_data()
         print "If you want to modify the following data, enter the new data. Otherwise, enter a new line to skip."
         for data in city_data:
@@ -193,3 +203,34 @@ def print_error(message):
     :param message: to be printed
     """
     print(Fore.RED + message + Fore.RESET)
+
+
+def get_int_input(prompt):
+    """ Get integer input values from the user
+
+    :param prompt: message to ask user for
+    :return: input value
+    """
+    input_value = None
+    while input_value is None:
+        try:
+            input_value = int(raw_input(prompt))
+        except:
+            print_error("Invalid Number.")
+    return input_value
+
+
+def get_city_code_input(prompt):
+    input_value = raw_input(prompt)
+    while len(input_value) != 3 or not input_value.isupper() or not input_value.isalpha():
+        print_error("Invalid Input")
+        input_value = raw_input(prompt)
+    return input_value
+
+
+def get_bidirectional_prompt(prompt):
+    bidirectional = raw_input(prompt)
+    while bidirectional.lower() != "y" and bidirectional.lower() != "n":
+        print_error("Invalid Input.")
+        bidirectional = raw_input(prompt)
+    return bidirectional
