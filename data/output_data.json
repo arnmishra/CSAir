@@ -235,6 +235,19 @@
             "timezone": -3
         }, 
         {
+            "code": "CMI", 
+            "continent": "North America", 
+            "coordinates": {
+                "N": 40, 
+                "W": 88
+            }, 
+            "country": "US", 
+            "name": "Champaign", 
+            "population": 226000, 
+            "region": 1, 
+            "timezone": -6
+        }, 
+        {
             "code": "SFO", 
             "continent": "North America", 
             "coordinates": {
@@ -704,6 +717,13 @@
             ]
         }, 
         {
+            "distance": 1757, 
+            "ports": [
+                "MIA", 
+                "CMI"
+            ]
+        }, 
+        {
             "distance": 2425, 
             "ports": [
                 "MIA", 
@@ -739,6 +759,13 @@
             ]
         }, 
         {
+            "distance": 2453, 
+            "ports": [
+                "LIM", 
+                "SCL"
+            ]
+        }, 
+        {
             "distance": 4231, 
             "ports": [
                 "LIM", 
@@ -771,6 +798,13 @@
             "ports": [
                 "ATL", 
                 "WAS"
+            ]
+        }, 
+        {
+            "distance": 785, 
+            "ports": [
+                "ATL", 
+                "CMI"
             ]
         }, 
         {
@@ -1026,6 +1060,13 @@
             ]
         }, 
         {
+            "distance": 1208, 
+            "ports": [
+                "NYC", 
+                "CMI"
+            ]
+        }, 
+        {
             "distance": 568, 
             "ports": [
                 "NYC", 
@@ -1103,6 +1144,69 @@
             ]
         }, 
         {
+            "distance": 1757, 
+            "ports": [
+                "CMI", 
+                "MIA"
+            ]
+        }, 
+        {
+            "distance": 198, 
+            "ports": [
+                "CMI", 
+                "CHI"
+            ]
+        }, 
+        {
+            "distance": 785, 
+            "ports": [
+                "CMI", 
+                "ATL"
+            ]
+        }, 
+        {
+            "distance": 831, 
+            "ports": [
+                "CMI", 
+                "YYZ"
+            ]
+        }, 
+        {
+            "distance": 2955, 
+            "ports": [
+                "CMI", 
+                "SFO"
+            ]
+        }, 
+        {
+            "distance": 2736, 
+            "ports": [
+                "CMI", 
+                "LAX"
+            ]
+        }, 
+        {
+            "distance": 1208, 
+            "ports": [
+                "CMI", 
+                "NYC"
+            ]
+        }, 
+        {
+            "distance": 975, 
+            "ports": [
+                "CMI", 
+                "WAS"
+            ]
+        }, 
+        {
+            "distance": 2518, 
+            "ports": [
+                "CMI", 
+                "MEX"
+            ]
+        }, 
+        {
             "distance": 543, 
             "ports": [
                 "SFO", 
@@ -1121,6 +1225,13 @@
             "ports": [
                 "SFO", 
                 "MNL"
+            ]
+        }, 
+        {
+            "distance": 2955, 
+            "ports": [
+                "SFO", 
+                "CMI"
             ]
         }, 
         {
@@ -1439,10 +1550,10 @@
             ]
         }, 
         {
-            "distance": 2994, 
+            "distance": 198, 
             "ports": [
                 "CHI", 
-                "SFO"
+                "CMI"
             ]
         }, 
         {
@@ -1450,6 +1561,20 @@
             "ports": [
                 "CHI", 
                 "ATL"
+            ]
+        }, 
+        {
+            "distance": 684, 
+            "ports": [
+                "CHI", 
+                "YYZ"
+            ]
+        }, 
+        {
+            "distance": 2994, 
+            "ports": [
+                "CHI", 
+                "SFO"
             ]
         }, 
         {
@@ -1464,13 +1589,6 @@
             "ports": [
                 "CHI", 
                 "MEX"
-            ]
-        }, 
-        {
-            "distance": 684, 
-            "ports": [
-                "CHI", 
-                "YYZ"
             ]
         }, 
         {
@@ -1611,6 +1729,13 @@
             "ports": [
                 "WAS", 
                 "ATL"
+            ]
+        }, 
+        {
+            "distance": 975, 
+            "ports": [
+                "WAS", 
+                "CMI"
             ]
         }, 
         {
@@ -1782,6 +1907,13 @@
             ]
         }, 
         {
+            "distance": 831, 
+            "ports": [
+                "YYZ", 
+                "CMI"
+            ]
+        }, 
+        {
             "distance": 568, 
             "ports": [
                 "YYZ", 
@@ -1835,6 +1967,13 @@
             "ports": [
                 "JNB", 
                 "KRT"
+            ]
+        }, 
+        {
+            "distance": 2736, 
+            "ports": [
+                "LAX", 
+                "CMI"
             ]
         }, 
         {
@@ -1901,6 +2040,13 @@
             ]
         }, 
         {
+            "distance": 2518, 
+            "ports": [
+                "MEX", 
+                "CMI"
+            ]
+        }, 
+        {
             "distance": 2053, 
             "ports": [
                 "MEX", 
@@ -1915,13 +2061,6 @@
             ]
         }, 
         {
-            "distance": 3158, 
-            "ports": [
-                "MEX", 
-                "BOG"
-            ]
-        }, 
-        {
             "distance": 2499, 
             "ports": [
                 "MEX", 
@@ -1933,6 +2072,13 @@
             "ports": [
                 "MEX", 
                 "CHI"
+            ]
+        }, 
+        {
+            "distance": 3158, 
+            "ports": [
+                "MEX", 
+                "BOG"
             ]
         }
     ], 

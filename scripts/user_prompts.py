@@ -136,9 +136,9 @@ def get_statistic(statistic_code, airline_network):
         return get_hub_cities(airline_network, min_hub)
     elif statistic_code == 8:
         city_codes = []
-        print "Enter city codes one at a time in order of your route. Enter 'done' when you are finished."
+        print "Enter city codes one at a time in order of your route. Enter 'NON' when you are finished."
         input_code = get_city_code_input("Enter a city code: ")
-        while input_code.lower() != "done":
+        while input_code.lower() != "non":
             city_codes.append(input_code)
             input_code = get_city_code_input("Enter a city code: ")
         return get_route_data(airline_network, city_codes)

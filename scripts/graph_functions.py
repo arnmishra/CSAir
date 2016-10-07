@@ -2,7 +2,6 @@
 
 import webbrowser
 import json
-import sys
 import math
 from Queue import PriorityQueue
 
@@ -12,7 +11,7 @@ MAP_BASE_URL = "http://www.gcmap.com/mapui?P="
 ACCELERATION = ((750.0/60)**2)/(2*200)  # a = v^2/(2*d) in km/min^2
 
 
-def add_file_data_to_graph(airline_network=Graph(), map_file_path="data/output_data.json"):
+def add_file_data_to_graph(airline_network=Graph(), map_file_path="data/map_data.json"):
     """ Creates graph object from JSON File with data about airline mappings. This
     includes making each connection bidirectional between the cities.
 
@@ -33,9 +32,17 @@ def add_file_data_to_graph(airline_network=Graph(), map_file_path="data/output_d
     for metro in map_data["metros"]:
         airline_network.add_node(metro["code"], metro)
     for route in map_data["routes"]:
-        airline_network.add_connection(route["ports"][0], route["ports"][1], route["distance"])
+        start_city_code = route["ports"][0]
+        end_city_code = route["ports"][1]
+        if not airline_network.get_node(start_city_code):
+            print "%s not in Network. Route(s) to/from %s Not Created" % (start_city_code, end_city_code)
+            continue
+        if not airline_network.get_node(end_city_code):
+            print "%s not in Network. Route(s) to/from %s Not Created" % (end_city_code, start_city_code)
+            continue
+        airline_network.add_connection(start_city_code, end_city_code, route["distance"])
         if not unidirectional:
-            airline_network.add_connection(route["ports"][1], route["ports"][0], route["distance"])
+            airline_network.add_connection(end_city_code, start_city_code, route["distance"])
     return airline_network
 
 
